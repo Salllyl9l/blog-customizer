@@ -1,4 +1,4 @@
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { useState } from 'react';
 
 import { ArrowButton } from './ArrowButton';
@@ -9,7 +9,7 @@ const meta: Meta<typeof ArrowButton> = {
 
 export default meta;
 
-const Template: Story = (args) => {
+const Template: StoryFn = (args) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	function toggleOpen() {
@@ -20,4 +20,6 @@ const Template: Story = (args) => {
 };
 
 export const ArrowButtonStory = Template.bind({});
-ArrowButtonStory.args = {};
+ArrowButtonStory.args = {
+	// Укажите начальные значения для свойств ArrowButton, если это необходимо
+};
