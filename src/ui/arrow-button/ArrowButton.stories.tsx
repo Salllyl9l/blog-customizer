@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import { useState } from 'react';
 
 import { ArrowButton } from './ArrowButton';
@@ -9,20 +9,15 @@ const meta: Meta<typeof ArrowButton> = {
 
 export default meta;
 
-type Story = StoryObj<typeof ArrowButton>;
-
-const ArrowButtonStory: Story = () => {
+const Template: Story = (args) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	function toggleOpen() {
 		setIsOpen((oldVal) => !oldVal);
 	}
 
-	return (
-		<>
-			<ArrowButton toggleOpenFn={toggleOpen} openState={isOpen} />
-		</>
-	);
+	return <ArrowButton toggleOpenFn={toggleOpen} openState={isOpen} {...args} />;
 };
 
-export { ArrowButtonStory };
+export const ArrowButtonStory = Template.bind({});
+ArrowButtonStory.args = {};
