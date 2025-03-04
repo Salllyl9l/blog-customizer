@@ -1,25 +1,20 @@
-import type { Meta, StoryFn } from '@storybook/react';
-import { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { ArrowButton } from './ArrowButton';
+import { createElement, useState } from 'react';
 
 const meta: Meta<typeof ArrowButton> = {
 	component: ArrowButton,
 };
 
 export default meta;
+type Story = StoryObj<typeof ArrowButton>;
 
-const Template: StoryFn = (args) => {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
+export const ArrowButtonStory: Story = {
+	render: () =>
+		createElement(() => {
+			const [isOpen, setIsOpen] = useState(false);
 
-	function toggleOpen() {
-		setIsOpen((oldVal) => !oldVal);
-	}
-
-	return <ArrowButton toggleOpenFn={toggleOpen} openState={isOpen} {...args} />;
-};
-
-export const ArrowButtonStory = Template.bind({});
-ArrowButtonStory.args = {
-	// Укажите начальные значения для свойств ArrowButton, если это необходимо
+			return <ArrowButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />;
+		}),
 };
