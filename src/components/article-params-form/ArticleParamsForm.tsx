@@ -1,124 +1,114 @@
-import styles from './ArticleParamsForm.module.scss';
-import clsx from 'clsx';
-import { useState } from 'react';
-
-import { Text } from '../../ui/text';
-import { Select } from '../../ui/select';
-import { RadioGroup } from '../../ui/radio-group';
-import { Separator } from '../../ui/separator';
-import { ArrowButton } from '../../ui/arrow-button';
-import { Button } from '../../ui/button';
-
-import { OnClick } from '../../ui/arrow-button/ArrowButton';
-
+import { ArrowButton } from 'src/ui/arrow-button';
+import { Button } from 'src/ui/button';
+import { useRef, useState } from 'react';
 import {
-	OptionType,
-	fontFamilyOptions,
-	fontSizeOptions,
-	fontColors,
+	ArticleStateType,
 	backgroundColors,
 	contentWidthArr,
 	defaultArticleState,
+	fontColors,
+	fontFamilyOptions,
+	fontSizeOptions,
+	OptionType,
 } from 'src/constants/articleProps';
-import { IAllOptions } from 'src/index';
+import { Select } from 'src/ui/select';
+import { Separator } from 'src/ui/separator';
+import { RadioGroup } from 'src/ui/radio-group';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+import clsx from 'clsx';
+import styles from './ArticleParamsForm.module.scss';
 
-export type ChangeSelectFn = (selection: OptionType) => void;
+type ArticleParamsFormProps = {
+	AppState: (param: ArticleStateType) => void;
+};
 
-interface PropsArticleParamsForm {
-	toggleOpenFn: OnClick;
-	openState: boolean;
-	setPageState: React.Dispatch<React.SetStateAction<IAllOptions>>;
-}
+export const ArticleParamsForm = ({ AppState }: ArticleParamsFormProps) => {
+	const rootRef = useRef<HTMLDivElement>(null);
+	const [isOpen, setOpen] = useState<boolean>(false);
+	const [OptionState, setOptionState] =
+		useState<ArticleStateType>(defaultArticleState);
 
-export const ArticleParamsForm = ({
-	toggleOpenFn,
-	openState,
-	setPageState,
-}: PropsArticleParamsForm) => {
-	const [formState, setFormState] = useState<IAllOptions>(defaultArticleState);
-
-	function setDefaultOptions() {
-		setFormState(defaultArticleState);
-		setPageState(defaultArticleState);
+	function changeState(key: keyof ArticleStateType) {
+		return function (value: OptionType) {
+			setOptionState((prevState) => ({ ...prevState, [key]: value }));
+		};
 	}
 
-	function submitForm(evt: React.SyntheticEvent) {
-		evt.preventDefault();
-		setPageState(formState);
+	function resetState() {
+		setOptionState(defaultArticleState);
+		AppState(defaultArticleState);
 	}
+
+	useOutsideClickClose({
+		isOpen: isOpen,
+		rootRef,
+		onClose: () => setOpen(false),
+		onChange: setOpen,
+	});
 
 	return (
 		<>
-			<ArrowButton toggleOpenFn={toggleOpenFn} openState={openState} />
-			<aside
-				className={clsx({
-					[styles.container]: true,
-					[styles.container_open]: openState,
-				})}>
-				<form className={styles.form} onSubmit={submitForm}>
-					<Text as='h1' size={31} weight={800} uppercase dynamicLite>
-						Задайте параметры
-					</Text>
-					<Select
-						title='шрифт'
-						selected={formState.fontFamilyOption}
-						options={fontFamilyOptions}
-						onChange={(selected) =>
-							setFormState((oldState) => ({
-								...oldState,
-								fontFamilyOption: selected,
-							}))
-						}
-					/>
-					<RadioGroup
-						title='размер шрифта'
-						name='font-size'
-						selected={formState.fontSizeOption}
-						options={fontSizeOptions}
-						onChange={(selected) =>
-							setFormState((oldState) => ({
-								...oldState,
-								fontSizeOption: selected,
-							}))
-						}
-					/>
-					<Select
-						title='цвет шрифта'
-						selected={formState.fontColor}
-						options={fontColors}
-						onChange={(selected) =>
-							setFormState((oldState) => ({ ...oldState, fontColor: selected }))
-						}
-					/>
-					<Separator />
-					<Select
-						title='цвет фона'
-						selected={formState.backgroundColor}
-						options={backgroundColors}
-						onChange={(selected) =>
-							setFormState((oldState) => ({
-								...oldState,
-								backgroundColor: selected,
-							}))
-						}
-					/>
-					<Select
-						title='ширина контента'
-						selected={formState.contentWidth}
-						options={contentWidthArr}
-						onChange={(selected) =>
-							setFormState((oldState) => ({
-								...oldState,
-								contentWidth: selected,
-							}))
-						}
-					/>
-					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' type='reset' onClick={setDefaultOptions} />
-						<Button title='Применить' type='submit' />
-					</div>
-				</form>
-			</aside>
+			<div ref={rootRef}>
+				<ArrowButton
+					isOpen={isOpen}
+					onClick={() => {
+						setOpen(!isOpen);
+					}}
+				/>
+				<aside
+					className={clsx(styles.container, isOpen && styles.container_open)}>
+					<form
+						className={styles.form}
+						onSubmit={(evt) => {
+							evt.preventDefault();
+							AppState(OptionState);
+						}}>
+						<h1 className={styles.header}>Задайте параметры</h1>
+						<Select
+							title='Шрифт'
+							selected={OptionState.fontFamilyOption}
+							options={fontFamilyOptions}
+							onChange={changeState('fontFamilyOption')}
+						/>
+						<RadioGroup
+							title='Размер шрифта'
+							name='Fonts'
+							selected={OptionState.fontSizeOption}
+							options={fontSizeOptions}
+							onChange={changeState('fontSizeOption')}
+						/>
+						<Select
+							title='Цвет шрифта'
+							selected={OptionState.fontColor}
+							options={fontColors}
+							onChange={changeState('fontColor')}
+						/>
+						<Separator />
+						<Select
+							title='Цвет фона'
+							selected={OptionState.backgroundColor}
+							options={backgroundColors}
+							onChange={changeState('backgroundColor')}
+						/>
+						<Select
+							title='Ширина контента'
+							selected={OptionState.contentWidth}
+							options={contentWidthArr}
+							onChange={changeState('contentWidth')}
+						/>
+
+						<div className={styles.bottomContainer}>
+							<Button
+								title='Сбросить'
+								htmlType='reset'
+								type='clear'
+								onClick={resetState}
+							/>
+							<Button title='Применить' htmlType='submit' type='apply' />
+						</div>
+					</form>
+				</aside>
+			</div>
 		</>
 	);
 };
